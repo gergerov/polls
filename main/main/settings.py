@@ -87,3 +87,6 @@ USE_L10N = True
 USE_TZ = True
 STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATICFILES_DIRS = ['', ]
+STATIC_ROOT = '/home/tattoo/app/tattoo/main/static'  # абсолютный путь на сервере
