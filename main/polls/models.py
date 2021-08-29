@@ -181,6 +181,7 @@ class Answer(models.Model):
         , null=False
         , on_delete=models.DO_NOTHING
         , related_name="answers"
+        
     )
 
     answer_item = models.ForeignKey(
@@ -189,6 +190,7 @@ class Answer(models.Model):
         , on_delete=models.DO_NOTHING
         , help_text="Выбранный вариант ответа"
         , null=True
+        , blank=True
     )
 
     answer_as_text = models.TextField(
@@ -196,4 +198,5 @@ class Answer(models.Model):
         , verbose_name="Ответ как текст"
         , help_text="По ТЗ ответ может быть простым текстом"
         , null=True
+        , blank=True
     )
