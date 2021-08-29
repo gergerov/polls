@@ -9,7 +9,8 @@ from polls.api.poll_sessions.serializers import \
     ViewPollSessionInfoSerializer, ViewPollSessionInfoByUserIdSerrializer
 from polls.service import \
     poll_session_get_or_create, finish_poll_session, \
-    poll_session_info, poll_session_detail
+    poll_session_info, poll_session_detail, \
+    poll_session_unanswered_questions
 from polls.models import PollSession
 
 
@@ -48,6 +49,7 @@ class ViewPollSessionDetail(APIView):
         PollSession.poll_sessions.get(pk) # проверка на существование сессии
         poll_session_info_dict = poll_session_info(pk)[0]
         poll_session_info_dict['details'] = poll_session_detail(pk)
+        poll_session_info_dict['unanswered'] = poll_session_unanswered_questions(pk)
         serializer = ViewPollSessionInfoSerializer(data=poll_session_info_dict)
         serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)

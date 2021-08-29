@@ -35,6 +35,7 @@ def create_answer(poll_session_id, question_id, question_item_id=None, text=None
     # дают ли нам ответ на вопрос, который есть в опросе
     if poll_session_object.poll != question_object.poll:
         raise PollDoesNotHaveThisQuestion
+    
     if question_object.type == 'T':
         return __create_answer_on_text(poll_session_object, question_object, text)
     if question_object.type == 'M':
@@ -87,7 +88,6 @@ def __question_item_exists_in_question(question_object, question_item_object):
     poll_questions = QuestionItem.question_items.by_question(question_object.pk)
     if question_item_object not in poll_questions:
         raise AnswerQuestionItemNotInThisQuestionItems
-
 
 
 def finish_poll_session(poll_session_id):
@@ -152,6 +152,28 @@ def poll_session_detail(poll_session_id):
                 left join polls_questionitem qi on a.answer_item_id = qi.id
 	where 
         ps.id=%s
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(SQL, [poll_session_id])
+        return __dictfetchall(cursor=cursor)
+
+
+def poll_session_unanswered_questions(poll_session_id):
+    SQL = """
+    select 
+        all_questions.text 	question_text,
+        all_questions.type 	question_type,	
+        all_questions.id    question_id
+    from 
+        polls_pollsession ps
+        inner join polls_poll p on ps.poll_id = p.id
+            inner join polls_question all_questions on all_questions.poll_id = p.id
+            
+            left join polls_answer a on ps.id = a.poll_session_id and a.question_id = all_questions.id
+                left join polls_questionitem qi on a.answer_item_id = qi.id
+    where 
+        ps.id=%s
+        and a.id is null
     """
     with connection.cursor() as cursor:
         cursor.execute(SQL, [poll_session_id])

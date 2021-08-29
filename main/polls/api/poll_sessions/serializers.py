@@ -32,9 +32,16 @@ class ViewPollSessionDetailSerializer(serializers.Serializer):
     question_item_id = serializers.IntegerField(required=False, allow_null=True)
 
 
+class UnansweredQuestion(serializers.Serializer):
+    question_text = serializers.CharField(required=True)
+    question_type = serializers.CharField(required=True)
+    question_id = serializers.IntegerField(required=True)
+
+
 class ViewPollSessionInfoSerializer(serializers.Serializer):
     """Сериализатор информации по сессии опроса"""
     details = ViewPollSessionDetailSerializer(many=True)
+    unanswered = UnansweredQuestion(many=True)
     poll_session_id = serializers.IntegerField(required=True)
     poll_id = serializers.IntegerField(required=True)
     finished = serializers.BooleanField(required=True)
@@ -45,4 +52,5 @@ class ViewPollSessionInfoSerializer(serializers.Serializer):
 
 class ViewPollSessionInfoByUserIdSerrializer(serializers.Serializer):
     sessions = ViewPollSessionInfoSerializer(many=True)
+
 
