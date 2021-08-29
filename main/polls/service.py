@@ -28,42 +28,66 @@ def poll_session_get_or_create(poll_id, user_id=None):
 
 def create_answer(poll_session_id, question_id, question_item_id=None, text=None):
     poll_session_object = PollSession.poll_sessions.get(poll_session_id)
+    question_object = Question.questions.get(question_id)
     # если сессия опроса уже завершена, ответы не принимаются
     if poll_session_object.finished == True:
         raise AnswerOnFinishedPollSession
-    
-    question_object = Question.questions.get(question_id)
     # дают ли нам ответ на вопрос, который есть в опросе
     if poll_session_object.poll != question_object.poll:
         raise PollDoesNotHaveThisQuestion
-    
-    # есть ли вариант ответа на вопрос, на который отвечать нужно выбирая 
-    if question_object.type in ['M', 'S'] and question_item_id is None:
+    if question_object.type == 'T':
+        return __create_answer_on_text(poll_session_object, question_object, text)
+    if question_object.type == 'M':
+        return __create_answer_on_multi(poll_session_object, question_object, question_item_id)
+    if question_object.type == 'S':
+        return __create_answer_on_single(poll_session_object, question_object, question_item_id)
+
+
+def __create_answer_on_single(poll_session_object, question_object, question_item_id=None):
+    if question_item_id is None:
+        raise AnswerByThisQuestionMustHaveItem
+
+    if Answer.objects.filter(poll_session__pk=poll_session_object.pk, question__pk=question_object.pk).exists():
+        raise AnswerOnThisQuestionAlreadyExists
+
+    question_item_object = QuestionItem.question_items.get(question_item_id)
+    __question_item_exists_in_question(question_object, question_item_object)
+
+    answer = Answer.objects.create(poll_session=poll_session_object, question=question_object, answer_item=question_item_object)
+    return answer
+
+
+def __create_answer_on_multi(poll_session_object, question_object, question_item_id=None):
+    if question_item_id is None:
         raise AnswerByThisQuestionMustHaveItem
     
-    # есть ли текст ответа на вопрос, на который нужно отвечать текстом
+    if Answer.objects.filter(poll_session__pk=poll_session_object.pk, question__pk=question_object.pk, answer_item__pk=question_item_id).exists():
+        raise AnswerItemOnThisMultiQuestionAlreadyExists
+
+    question_item_object = QuestionItem.question_items.get(question_item_id)
+    __question_item_exists_in_question(question_object, question_item_object)
+    
+    answer = Answer.objects.create(poll_session=poll_session_object, question=question_object, answer_item=question_item_object)
+    return answer
+
+
+def __create_answer_on_text(poll_session_object, question_object, text=None):
     if question_object.type == 'T' and text is None:
         raise AnswerByThisQuestionMustHaveText
+
+    if Answer.objects.filter(poll_session__pk=poll_session_object.pk, question__pk=question_object.pk).exists():
+        raise AnswerOnThisQuestionAlreadyExists
+
+    answer = Answer.objects.create(poll_session=poll_session_object, question=question_object, answer_as_text=text)
+    return answer
     
-    # существует ли уже ответ на вопрос, на который отвчают единожды
-    if question_object.type in ['T', 'S']:
-        if Answer.objects.filter(poll_session__pk=poll_session_id, question__pk=question_id).exists():
-            raise AnswerOnThisQuestionAlreadyExists
-    
-    # существует ли уже вариант ответа на вопрос, на который можно выбрать несколько вариантов
-    if question_object.type == 'M':
-        if Answer.objects.filter(poll_session__pk=poll_session_id, question__pk=question_id, answer_item__pk=question_item_id).exists():
-            raise AnswerItemOnThisMultiQuestionAlreadyExists
-    
-    # если проверки пройдены
-    if question_item_id:
-        question_item_object = QuestionItem.question_items.get(question_item_id)
-        answer = Answer.objects.create(poll_session=poll_session_object, question=question_object, answer_item=question_item_object)
-        return answer
-    
-    else:
-        answer = Answer.objects.create(poll_session=poll_session_object, question=question_object, answer_as_text=text)
-        return answer
+
+def __question_item_exists_in_question(question_object, question_item_object):
+    """Проверка, есть ли у вопроса такой вариант ответа"""
+    poll_questions = QuestionItem.question_items.by_question(question_object.pk)
+    if question_item_object not in poll_questions:
+        raise AnswerQuestionItemNotInThisQuestionItems
+
 
 
 def finish_poll_session(poll_session_id):

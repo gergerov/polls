@@ -144,12 +144,6 @@ class PollSession(models.Model):
         , db_index=True
     )
 
-    session_id = models.IntegerField(
-        verbose_name="Сессия для сессии опроса, если аноним"
-        , help_text="Чтобы не хреначить кучу сессий опросов"
-        , null=True # если пустой, значит не аноним
-    )
-
     def __str__(self):
         user = ''
         if self.user_id:

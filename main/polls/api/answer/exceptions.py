@@ -31,3 +31,8 @@ class AnswerOnFinishedPollSession(APIException):
     default_detail = "Попытка ответить на вопрос сессии опроса, которая завершена"
 
 
+class AnswerQuestionItemNotInThisQuestionItems(APIException):
+    status_code = 400
+    default_detail = "У этого вопроса нет такого вариантов ответа"
+
+
