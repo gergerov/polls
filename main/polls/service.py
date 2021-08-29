@@ -90,7 +90,7 @@ def poll_session_info(poll_session_id):
 
         from 
             polls_pollsession ps
-            inner join polls_answer a on ps.id = a.poll_session_id
+            left join polls_answer a on ps.id = a.poll_session_id
                 left join polls_question qanswered on a.question_id = qanswered.id
             
             inner join polls_poll p on ps.poll_id = p.id
