@@ -6,7 +6,7 @@ from main.views import LoginView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('polls/api/', include('polls.urls')),
-    path('drfauth/', LoginView.as_view(), name='drfauth'),
+    path('polls/api/drfauth/', LoginView.as_view(), name='drfauth'),
 ]
 
 urlpatterns += doc_urls
