@@ -51,6 +51,6 @@ class ViewPollSessionInfoSerializer(serializers.Serializer):
 
 
 class ViewPollSessionInfoByUserIdSerrializer(serializers.Serializer):
-    sessions = ViewPollSessionInfoSerializer(many=True)
+    sessions = ViewPollSessionInfoSerializer(many=True, allow_null=True)
 
 

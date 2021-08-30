@@ -71,6 +71,7 @@ class ViewPollSessionDetailByUserID(ListAPIView):
             id = pk['pk']
             poll_session_info_dict = poll_session_info(id)[0]
             poll_session_info_dict['details'] = poll_session_detail(id)
+            poll_session_info_dict['unanswered'] = poll_session_unanswered_questions(id)
             poll_session_infos.append(poll_session_info_dict)
         
         serializer = ViewPollSessionInfoByUserIdSerrializer(data={"sessions": poll_session_infos})
